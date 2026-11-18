@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>NEWESOME ONLINE — Твой мир. Твои правила.</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
@@ -80,11 +81,114 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8ba2;font-size:1
 <section id="start"><div class="cta"><div><div class="eyebrow">Твой следующий шаг</div><h2>Готов начать свою историю?</h2><p>NEWESOME ONLINE — твой мир начинается здесь.</p></div><button class="btn" onclick="comingSoon()">Скоро открытие →</button></div></section>
 </main>
 <footer><div class="wrap foot"><div><b style="color:#dce6ff">NEWESOME ONLINE</b> · Игровой RP-проект</div><div>© 2026 NEWESOME ONLINE. Неофициальный демонстрационный сайт.</div></div></footer>
-<div class="modal" id="loginModal" onclick="if(event.target===this)closeModal()"><div class="modalBox"><button class="close" onclick="closeModal()">×</button><h2>Личный кабинет</h2><p>Вход и регистрация появятся после подключения серверной части проекта.</p><input placeholder="Логин или электронная почта" disabled><input placeholder="Пароль" type="password" disabled><button class="btn" onclick="closeModal()">Понятно</button><p class="notice">Это демонстрационный макет. Не вводи здесь свои настоящие пароли.</p></div></div>
+<div class="modal" id="loginModal" onclick="if(event.target===this)closeModal()">
+  <div class="modalBox">
+    <button class="close" onclick="closeModal()">×</button>
+    <h2 id="authTitle">Личный кабинет</h2>
+    <p id="authDescription">Войди в аккаунт или создай новый.</p>
+    <div id="authForm">
+      <input id="displayName" placeholder="Имя игрока (для регистрации)" autocomplete="nickname" style="display:none">
+      <input id="authEmail" type="email" placeholder="Электронная почта" autocomplete="email">
+      <input id="authPassword" type="password" placeholder="Пароль (не менее 6 символов)" autocomplete="current-password">
+      <button class="btn" id="authSubmit" onclick="submitAuth()">Войти</button>
+      <button class="btn secondary" id="authSwitch" onclick="switchAuthMode()" style="width:100%;margin-top:10px">Создать аккаунт</button>
+    </div>
+    <div id="profilePanel" style="display:none">
+      <p id="profileText"></p>
+      <button class="btn" onclick="signOut()" style="width:100%">Выйти из аккаунта</button>
+    </div>
+    <p id="authMessage" role="status" style="margin-top:14px"></p>
+    <p class="notice">Используй действующую почту. При включённом подтверждении регистрации Supabase отправит письмо для активации аккаунта.</p>
+  </div>
+</div>
 <script>
-function openModal(){document.getElementById('loginModal').classList.add('show')}
-function closeModal(){document.getElementById('loginModal').classList.remove('show')}
+// 1) Создай проект Supabase и вставь сюда Project URL и anon/public key.
+const SUPABASE_URL = "https://gxhtwytsmbkmkfgzaqxz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_k7Fp1MC6EgzGQ9xryDH10Q_r0_WTHG7";
+let supabaseClient = null;
+let authMode = "login";
+
+function getSupabase() {
+  if (SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("ВСТАВЬТЕ") &&
+      SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("ВСТАВЬТЕ")) {
+    if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return supabaseClient;
+  }
+  showAuthMessage("Сначала подключи Supabase: вставь Project URL и anon/public key в код сайта.", true);
+  return null;
+}
+function showAuthMessage(message, isError=false) {
+  const el = document.getElementById("authMessage");
+  el.textContent = message;
+  el.style.color = isError ? "#ff9b9b" : "#7ee8bd";
+}
+function openModal(){
+  document.getElementById("loginModal").classList.add("show");
+  refreshSession();
+}
+function closeModal(){document.getElementById("loginModal").classList.remove("show")}
+function switchAuthMode(){
+  authMode = authMode === "login" ? "signup" : "login";
+  document.getElementById("authTitle").textContent = authMode === "login" ? "Вход в аккаунт" : "Регистрация";
+  document.getElementById("authSubmit").textContent = authMode === "login" ? "Войти" : "Зарегистрироваться";
+  document.getElementById("authSwitch").textContent = authMode === "login" ? "Создать аккаунт" : "У меня уже есть аккаунт";
+  document.getElementById("displayName").style.display = authMode === "signup" ? "block" : "none";
+  document.getElementById("authPassword").autocomplete = authMode === "login" ? "current-password" : "new-password";
+  showAuthMessage("");
+}
+async function submitAuth(){
+  const client = getSupabase(); if (!client) return;
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const displayName = document.getElementById("displayName").value.trim();
+  if (!email || !password) return showAuthMessage("Введи электронную почту и пароль.", true);
+  if (password.length < 6) return showAuthMessage("Пароль должен содержать минимум 6 символов.", true);
+  const button = document.getElementById("authSubmit"); button.disabled = true;
+  try {
+    if (authMode === "signup") {
+      const {data, error} = await client.auth.signUp({
+        email, password, options: {data: {display_name: displayName || "Игрок"}}
+      });
+      if (error) throw error;
+      if (data.session) {
+        showProfile(data.user);
+        showAuthMessage("Аккаунт создан! Добро пожаловать.");
+      } else {
+        showAuthMessage("Регистрация почти завершена. Проверь почту и перейди по ссылке подтверждения.");
+      }
+    } else {
+      const {data, error} = await client.auth.signInWithPassword({email, password});
+      if (error) throw error;
+      showProfile(data.user);
+      showAuthMessage("Ты успешно вошёл в аккаунт!");
+    }
+  } catch (e) { showAuthMessage(e.message || "Не удалось выполнить запрос.", true); }
+  finally { button.disabled = false; }
+}
+function showProfile(user){
+  document.getElementById("authForm").style.display = "none";
+  document.getElementById("profilePanel").style.display = "block";
+  const name = user.user_metadata?.display_name || "Игрок";
+  document.getElementById("authTitle").textContent = "Личный кабинет";
+  document.getElementById("profileText").textContent = "Привет, " + name + "! Почта: " + user.email;
+}
+function showAuthForm(){
+  document.getElementById("authForm").style.display = "block";
+  document.getElementById("profilePanel").style.display = "none";
+  document.getElementById("authTitle").textContent = authMode === "login" ? "Вход в аккаунт" : "Регистрация";
+}
+async function refreshSession(){
+  const client = getSupabase(); if (!client) return;
+  const {data} = await client.auth.getSession();
+  if (data.session) showProfile(data.session.user); else showAuthForm();
+}
+async function signOut(){
+  const client = getSupabase(); if (!client) return;
+  const {error} = await client.auth.signOut();
+  if (error) return showAuthMessage(error.message, true);
+  showAuthForm(); showAuthMessage("Ты вышел из аккаунта.");
+}
 function forumNotice(){alert("Форум пока находится в разработке. Скоро здесь можно будет создавать темы и общаться!")}
-function comingSoon(){alert('Этот раздел пока готовится к запуску NEWESOME ONLINE!')}
+function comingSoon(){alert("Этот раздел пока готовится к запуску NEWESOME ONLINE!")}
 </script>
 </body></html>
