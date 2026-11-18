@@ -32,7 +32,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8ba2;font-size:1
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(7px);z-index:30;place-items:center;padding:20px}.modal.show{display:grid}.modalBox{width:min(410px,100%);background:#111a2b;border:1px solid var(--line);border-radius:20px;padding:28px;position:relative}.close{position:absolute;right:18px;top:15px;background:none;border:0;color:#aab6ca;font-size:25px;cursor:pointer}.modalBox h2{font-size:25px;margin:0 0 8px}.modalBox p{color:var(--muted);font-size:12px;line-height:1.6}.modalBox input{width:100%;padding:14px;margin-top:12px;border-radius:10px;border:1px solid var(--line);background:#0a1120;color:white;font:inherit}.modalBox .btn{width:100%;margin-top:15px}.notice{font-size:10px!important;color:#7f8ba2!important}
 @media(max-width:800px){.links{display:none}.hero{grid-template-columns:1fr;padding-top:58px}.art{height:320px;grid-row:1}.orb{width:260px;height:260px}.ring{width:320px}.logoMark{font-size:65px}.f1{right:2%}.servers,.features{grid-template-columns:1fr 1fr}.news{grid-template-columns:1fr 1fr}.newsItem:first-child{grid-column:span 2}}
 @media(max-width:540px){header{height:70px}.brand{font-size:17px}.nav>.btn{padding:10px 13px;font-size:11px}.hero{gap:5px}.art{height:270px}.orb{width:220px;height:220px}.ring{width:270px;height:110px}.logoMark{font-size:52px}.f1{top:8px}.f2{bottom:8px}.stats{gap:20px}.stat strong{font-size:20px}section{padding:48px 0}.sectionHead{display:block}h2{font-size:28px}.servers,.features,.news{grid-template-columns:1fr}.newsItem:first-child{grid-column:auto}.cta{display:block;padding:25px}.cta .btn{margin-top:12px}}
-</style>
+.roleBadge{display:inline-block;padding:7px 12px;border:1px solid #5476a8;border-radius:999px;background:#17233c;color:#b9d5ff;font-weight:700;font-size:13px}\n</style>
 </head>
 <body>
 <header><div class="wrap nav">
@@ -95,6 +95,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8ba2;font-size:1
     </div>
     <div id="profilePanel" style="display:none">
       <p id="profileText"></p>
+      <p id="profileRole" class="roleBadge" style="margin:12px 0"></p>
       <button class="btn" onclick="signOut()" style="width:100%">Выйти из аккаунта</button>
     </div>
     <p id="authMessage" role="status" style="margin-top:14px"></p>
@@ -165,12 +166,35 @@ async function submitAuth(){
   } catch (e) { showAuthMessage(e.message || "Не удалось выполнить запрос.", true); }
   finally { button.disabled = false; }
 }
-function showProfile(user){
+async function showProfile(user){
   document.getElementById("authForm").style.display = "none";
   document.getElementById("profilePanel").style.display = "block";
   const name = user.user_metadata?.display_name || "Игрок";
   document.getElementById("authTitle").textContent = "Личный кабинет";
   document.getElementById("profileText").textContent = "Привет, " + name + "! Почта: " + user.email;
+  const roleEl = document.getElementById("profileRole");
+  roleEl.textContent = "Роль: Игрок";
+  const client = getSupabase();
+  if (!client) return;
+  const {data, error} = await client.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (error) {
+    showAuthMessage("Аккаунт работает, но таблица ролей ещё не настроена. Выполни SQL-файл из инструкции.", true);
+    return;
+  }
+  const roleNames = {
+    player: "Игрок",
+    moderator: "Модератор",
+    curator: "Куратор",
+    state_curator: "Государственный куратор",
+    crime_curator: "Криминальный куратор",
+    deputy_state_head: "ЗГС гос.",
+    state_head: "ГС гос.",
+    deputy_admin: "Заместитель главного администратора",
+    admin: "Главный администратор",
+    owner: "Владелец",
+    founder: "Основатель"
+  };
+  roleEl.textContent = "Роль: " + (roleNames[data?.role] || "Игрок");
 }
 function showAuthForm(){
   document.getElementById("authForm").style.display = "block";
