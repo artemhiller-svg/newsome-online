@@ -5,214 +5,882 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>NEWESOME ONLINE — Твой мир. Твои правила.</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
-:root{--bg:#080b14;--panel:#111827;--muted:#9aa7bd;--text:#f5f7ff;--blue:#4d7cff;--cyan:#28d7e5;--line:rgba(255,255,255,.09)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 75% 5%,rgba(57,91,190,.17),transparent 36%),radial-gradient(ellipse at 10% 55%,rgba(30,190,211,.08),transparent 35%);z-index:-1}
-a{color:inherit;text-decoration:none}.wrap{width:min(1160px,92%);margin:auto}
-header{height:82px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:rgba(8,11,20,.82);backdrop-filter:blur(16px);position:sticky;top:0;z-index:10}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font-weight:900;letter-spacing:1px;font-size:21px}.brand span{color:var(--cyan)}.links{display:flex;gap:28px;color:#c3cce0;font-size:13px;font-weight:700}.links a:hover{color:var(--cyan)}
-.btn{border:0;border-radius:12px;padding:13px 19px;background:linear-gradient(110deg,var(--blue),#7655ed);color:white;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 8px 26px rgba(77,124,255,.22);transition:.2s}.btn:hover{transform:translateY(-2px);filter:brightness(1.12)}.btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);box-shadow:none}
-.hero{min-height:620px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px;padding:76px 0 64px}
-.tag{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid rgba(40,215,229,.25);border-radius:30px;color:#8cebf1;background:rgba(40,215,229,.07);font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
-.dot{width:7px;height:7px;background:#35e3a2;border-radius:50%;box-shadow:0 0 12px #35e3a2}
-h1{font-size:clamp(46px,6vw,76px);line-height:.99;letter-spacing:-4px;margin:23px 0 20px;font-weight:900}h1 span{background:linear-gradient(100deg,#fff 5%,#7ea6ff 55%,#36dce5);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{max-width:530px;color:var(--muted);font-size:16px;line-height:1.8}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.stats{display:flex;gap:34px;margin-top:48px}.stat strong{display:block;font-size:24px}.stat small{color:var(--muted);font-size:11px}
-.art{height:420px;position:relative;display:grid;place-items:center}.orb{position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#6ba5ff,#3349a7 45%,#10172e 72%);filter:drop-shadow(0 0 70px rgba(68,110,255,.35));opacity:.72}
-.ring{position:absolute;width:430px;height:160px;border:1px solid rgba(99,186,255,.5);border-radius:50%;transform:rotate(-28deg);box-shadow:0 0 30px rgba(47,184,255,.12)}
-.logoMark{position:relative;font-size:82px;font-weight:900;letter-spacing:-8px;text-shadow:0 10px 50px rgba(0,0,0,.6)}.logoMark span{color:#55dce9}
-.floating{position:absolute;padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(13,21,39,.85);backdrop-filter:blur(12px);box-shadow:0 16px 40px #0005;font-size:12px}.floating b{display:block;font-size:16px}.f1{top:44px;right:0}.f2{bottom:52px;left:0}
-section{padding:68px 0}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px}.eyebrow{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}h2{font-size:34px;letter-spacing:-1.5px;margin:8px 0 0}.sub{color:var(--muted);font-size:13px}
-.servers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:linear-gradient(145deg,rgba(21,31,53,.96),rgba(12,17,30,.96));border:1px solid var(--line);border-radius:18px;padding:23px;position:relative;overflow:hidden}.card:after{content:"";position:absolute;width:150px;height:150px;right:-65px;top:-70px;background:rgba(76,124,255,.13);filter:blur(12px);border-radius:50%}.serverTop{display:flex;justify-content:space-between;align-items:center}.serverIcon{width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#4d7cff,#27cbd8);display:grid;place-items:center;font-size:20px;font-weight:900}.online{font-size:10px;color:#55e6ad;font-weight:800}.card h3{margin:20px 0 6px;font-size:20px}.card p{color:var(--muted);font-size:12px;line-height:1.6}.meter{height:6px;background:#263148;border-radius:8px;margin:18px 0 9px;overflow:hidden}.meter i{display:block;height:100%;width:68%;background:linear-gradient(90deg,#4d7cff,#28d7e5);border-radius:8px}.serverFoot{display:flex;justify-content:space-between;color:#b6c2d7;font-size:11px}.card .btn{width:100%;margin-top:20px}
-.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.feature{padding:22px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line)}.feature .ico{font-size:24px}.feature h3{font-size:16px;margin:13px 0 7px}.feature p{font-size:12px;line-height:1.7;color:var(--muted);margin:0}
-.news{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:15px}.newsItem{border-radius:17px;min-height:190px;padding:22px;background:linear-gradient(145deg,#1a2b4b,#101725);border:1px solid var(--line);display:flex;flex-direction:column;justify-content:end}.newsItem:first-child{background:linear-gradient(135deg,rgba(35,74,137,.92),rgba(17,25,44,.95))}.date{font-size:10px;color:#85dce7;font-weight:800;letter-spacing:1px}.newsItem h3{margin:9px 0 5px;font-size:17px}.newsItem p{margin:0;color:#b0bdd1;font-size:11px;line-height:1.6}
-.cta{padding:38px;border-radius:22px;background:linear-gradient(110deg,rgba(62,104,213,.25),rgba(35,199,211,.11));border:1px solid rgba(103,160,255,.2);display:flex;justify-content:space-between;align-items:center;gap:25px}.cta h2{font-size:29px}.cta p{color:var(--muted);font-size:13px}
-footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8ba2;font-size:11px}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(7px);z-index:30;place-items:center;padding:20px}.modal.show{display:grid}.modalBox{width:min(410px,100%);background:#111a2b;border:1px solid var(--line);border-radius:20px;padding:28px;position:relative}.close{position:absolute;right:18px;top:15px;background:none;border:0;color:#aab6ca;font-size:25px;cursor:pointer}.modalBox h2{font-size:25px;margin:0 0 8px}.modalBox p{color:var(--muted);font-size:12px;line-height:1.6}.modalBox input{width:100%;padding:14px;margin-top:12px;border-radius:10px;border:1px solid var(--line);background:#0a1120;color:white;font:inherit}.modalBox .btn{width:100%;margin-top:15px}.notice{font-size:10px!important;color:#7f8ba2!important}
-@media(max-width:800px){.links{display:none}.hero{grid-template-columns:1fr;padding-top:58px}.art{height:320px;grid-row:1}.orb{width:260px;height:260px}.ring{width:320px}.logoMark{font-size:65px}.f1{right:2%}.servers,.features{grid-template-columns:1fr 1fr}.news{grid-template-columns:1fr 1fr}.newsItem:first-child{grid-column:span 2}}
-@media(max-width:540px){header{height:70px}.brand{font-size:17px}.nav>.btn{padding:10px 13px;font-size:11px}.hero{gap:5px}.art{height:270px}.orb{width:220px;height:220px}.ring{width:270px;height:110px}.logoMark{font-size:52px}.f1{top:8px}.f2{bottom:8px}.stats{gap:20px}.stat strong{font-size:20px}section{padding:48px 0}.sectionHead{display:block}h2{font-size:28px}.servers,.features,.news{grid-template-columns:1fr}.newsItem:first-child{grid-column:auto}.cta{display:block;padding:25px}.cta .btn{margin-top:12px}}
-.roleBadge{display:inline-block;padding:7px 12px;border:1px solid #5476a8;border-radius:999px;background:#17233c;color:#b9d5ff;font-weight:700;font-size:13px}\n</style>
+
+:root{
+--bg:#080b14;
+--panel:#111827;
+--muted:#9aa7bd;
+--text:#f5f7ff;
+--blue:#4d7cff;
+--cyan:#28d7e5;
+--line:rgba(255,255,255,.09)
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif}
+
+body:before{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+background:radial-gradient(ellipse at 75% 5%,rgba(57,91,190,.17),transparent 36%),radial-gradient(ellipse at 10% 55%,rgba(30,190,211,.08),transparent 35%);
+z-index:-1
+}
+
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1160px,92%);margin:auto}
+
+header{
+height:82px;
+display:flex;
+align-items:center;
+border-bottom:1px solid var(--line);
+background:rgba(8,11,20,.82);
+backdrop-filter:blur(16px);
+position:sticky;
+top:0;
+z-index:10
+}
+
+.nav{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{font-weight:900;letter-spacing:1px;font-size:21px}
+.brand span{color:var(--cyan)}
+.links{display:flex;gap:28px;color:#c3cce0;font-size:13px;font-weight:700}
+.links a:hover{color:var(--cyan)}
+
+.btn{
+border:0;
+border-radius:12px;
+padding:13px 19px;
+background:linear-gradient(110deg,var(--blue),#7655ed);
+color:white;
+font-weight:800;
+font-family:inherit;
+cursor:pointer;
+box-shadow:0 8px 26px rgba(77,124,255,.22);
+transition:.2s
+}
+
+.btn:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);box-shadow:none}
+
+.hero{
+min-height:620px;
+display:grid;
+grid-template-columns:1.05fr .95fr;
+align-items:center;
+gap:40px;
+padding:76px 0 64px
+}
+
+.tag{
+display:inline-flex;
+align-items:center;
+gap:9px;
+padding:8px 12px;
+border:1px solid rgba(40,215,229,.25);
+border-radius:30px;
+color:#8cebf1;
+background:rgba(40,215,229,.07);
+font-size:11px;
+font-weight:800;
+letter-spacing:1.4px;
+text-transform:uppercase
+}
+
+.dot{
+width:7px;
+height:7px;
+background:#35e3a2;
+border-radius:50%;
+box-shadow:0 0 12px #35e3a2
+}
+
+h1{
+font-size:clamp(46px,6vw,76px);
+line-height:.99;
+letter-spacing:-4px;
+margin:23px 0 20px;
+font-weight:900
+}
+
+h1 span{
+background:linear-gradient(100deg,#fff 5%,#7ea6ff 55%,#36dce5);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent
+}
+
+.lead{max-width:530px;color:var(--muted);font-size:16px;line-height:1.8}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.stats{display:flex;gap:34px;margin-top:48px}
+.stat strong{display:block;font-size:24px}
+.stat small{color:var(--muted);font-size:11px}
+
+.art{height:420px;position:relative;display:grid;place-items:center}
+.orb{
+position:absolute;
+width:350px;
+height:350px;
+border-radius:50%;
+background:radial-gradient(circle at 35% 30%,#6ba5ff,#3349a7 45%,#10172e 72%);
+filter:drop-shadow(0 0 70px rgba(68,110,255,.35));
+opacity:.72
+}
+
+.ring{
+position:absolute;
+width:430px;
+height:160px;
+border:1px solid rgba(99,186,255,.5);
+border-radius:50%;
+transform:rotate(-28deg);
+box-shadow:0 0 30px rgba(47,184,255,.12)
+}
+
+.logoMark{
+position:relative;
+font-size:82px;
+font-weight:900;
+letter-spacing:-8px;
+text-shadow:0 10px 50px rgba(0,0,0,.6)
+}
+
+.logoMark span{color:#55dce9}
+
+.floating{
+position:absolute;
+padding:13px 16px;
+border:1px solid var(--line);
+border-radius:14px;
+background:rgba(13,21,39,.85);
+backdrop-filter:blur(12px);
+box-shadow:0 16px 40px #0005;
+font-size:12px
+}
+
+.floating b{display:block;font-size:16px}
+.f1{top:44px;right:0}
+.f2{bottom:52px;left:0}
+
+section{padding:68px 0}
+.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px}
+.eyebrow{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+h2{font-size:34px;letter-spacing:-1.5px;margin:8px 0 0}
+.sub{color:var(--muted);font-size:13px}
+
+.servers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+.card{
+background:linear-gradient(145deg,rgba(21,31,53,.96),rgba(12,17,30,.96));
+border:1px solid var(--line);
+border-radius:18px;
+padding:23px;
+position:relative;
+overflow:hidden
+}
+
+.card:after{
+content:"";
+position:absolute;
+width:150px;
+height:150px;
+right:-65px;
+top:-70px;
+background:rgba(76,124,255,.13);
+filter:blur(12px);
+border-radius:50%
+}
+
+.serverTop{display:flex;justify-content:space-between;align-items:center}
+
+.serverIcon{
+width:43px;
+height:43px;
+border-radius:13px;
+background:linear-gradient(140deg,#4d7cff,#27cbd8);
+display:grid;
+place-items:center;
+font-size:20px;
+font-weight:900
+}
+
+.online{font-size:10px;color:#55e6ad;font-weight:800}
+.card h3{margin:20px 0 6px;font-size:20px}
+.card p{color:var(--muted);font-size:12px;line-height:1.6}
+.meter{height:6px;background:#263148;border-radius:8px;margin:18px 0 9px;overflow:hidden}
+.meter i{display:block;height:100%;width:68%;background:linear-gradient(90deg,#4d7cff,#28d7e5);border-radius:8px}
+.serverFoot{display:flex;justify-content:space-between;color:#b6c2d7;font-size:11px}
+.card .btn{width:100%;margin-top:20px}
+
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+.feature{
+padding:22px;
+border-radius:16px;
+background:rgba(255,255,255,.035);
+border:1px solid var(--line)
+}
+
+.feature .ico{font-size:24px}
+.feature h3{font-size:16px;margin:13px 0 7px}
+.feature p{font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+
+.news{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:15px}
+
+.newsItem{
+border-radius:17px;
+min-height:190px;
+padding:22px;
+background:linear-gradient(145deg,#1a2b4b,#101725);
+border:1px solid var(--line);
+display:flex;
+flex-direction:column;
+justify-content:end
+}
+
+.newsItem:first-child{background:linear-gradient(135deg,rgba(35,74,137,.92),rgba(17,25,44,.95))}
+.date{font-size:10px;color:#85dce7;font-weight:800;letter-spacing:1px}
+.newsItem h3{margin:9px 0 5px;font-size:17px}
+.newsItem p{margin:0;color:#b0bdd1;font-size:11px;line-height:1.6}
+
+.cta{
+padding:38px;
+border-radius:22px;
+background:linear-gradient(110deg,rgba(62,104,213,.25),rgba(35,199,211,.11));
+border:1px solid rgba(103,160,255,.2);
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:25px
+}
+
+.cta h2{font-size:29px}
+.cta p{color:var(--muted);font-size:13px}
+
+footer{border-top:1px solid var(--line);padding:28px 0;color:#7f8ba2;font-size:11px}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.72);
+backdrop-filter:blur(7px);
+z-index:30;
+place-items:center;
+padding:20px
+}
+
+.modal.show{display:grid}
+
+.modalBox{
+width:min(410px,100%);
+background:#111a2b;
+border:1px solid var(--line);
+border-radius:20px;
+padding:28px;
+position:relative
+}
+
+.close{
+position:absolute;
+right:18px;
+top:15px;
+background:none;
+border:0;
+color:#aab6ca;
+font-size:25px;
+cursor:pointer
+}
+
+.modalBox h2{font-size:25px;margin:0 0 8px}
+.modalBox p{color:var(--muted);font-size:12px;line-height:1.6}
+
+.modalBox input{
+width:100%;
+padding:14px;
+margin-top:12px;
+border-radius:10px;
+border:1px solid var(--line);
+background:#0a1120;
+color:white;
+font:inherit
+}
+
+.modalBox .btn{width:100%;margin-top:15px}
+.notice{font-size:10px!important;color:#7f8ba2!important}
+
+.roleBadge{
+display:inline-block;
+padding:7px 12px;
+border:1px solid #5476a8;
+border-radius:999px;
+background:#17233c;
+color:#b9d5ff;
+font-weight:700;
+font-size:13px
+}
+
+@media(max-width:800px){
+.links{display:none}
+.hero{grid-template-columns:1fr;padding-top:58px}
+.art{height:320px;grid-row:1}
+.orb{width:260px;height:260px}
+.ring{width:320px}
+.logoMark{font-size:65px}
+.f1{right:2%}
+.servers,.features{grid-template-columns:1fr 1fr}
+.news{grid-template-columns:1fr 1fr}
+.newsItem:first-child{grid-column:span 2}
+}
+
+@media(max-width:540px){
+header{height:70px}
+.brand{font-size:17px}
+.nav>.btn{padding:10px 13px;font-size:11px}
+.hero{gap:5px}
+.art{height:270px}
+.orb{width:220px;height:220px}
+.ring{width:270px;height:110px}
+.logoMark{font-size:52px}
+.f1{top:8px}
+.f2{bottom:8px}
+.stats{gap:20px}
+.stat strong{font-size:20px}
+section{padding:48px 0}
+.sectionHead{display:block}
+h2{font-size:28px}
+.servers,.features,.news{grid-template-columns:1fr}
+.newsItem:first-child{grid-column:auto}
+.cta{display:block;padding:25px}
+.cta .btn{margin-top:12px}
+}
+</style>
 </head>
+
 <body>
-<header><div class="wrap nav">
+
+<header>
+<div class="wrap nav">
 <a class="brand" href="#home">NEWESOME <span>ONLINE</span></a>
-<nav class="links"><a href="#forum">ФОРУМ</a><a href="#about">О ПРОЕКТЕ</a><a href="#news">НОВОСТИ</a><a href="#start">КАК НАЧАТЬ</a></nav>
+<nav class="links">
+<a href="#forum">ФОРУМ</a>
+<a href="#about">О ПРОЕКТЕ</a>
+<a href="#news">НОВОСТИ</a>
+<a href="#start">КАК НАЧАТЬ</a>
+</nav>
 <button class="btn" onclick="openModal()">Личный кабинет</button>
-</div></header>
+</div>
+</header>
+
 <main id="home" class="wrap">
+
 <div class="hero">
 <div>
 <div class="tag"><i class="dot"></i> Игровой RP-проект</div>
+
 <h1>ТВОЯ ИСТОРИЯ.<br><span>ТВОИ ПРАВИЛА.</span></h1>
-<p class="lead">Добро пожаловать в NEWESOME ONLINE — мир больших возможностей, ярких встреч и собственной истории. Выбирай путь и создавай свою легенду.</p>
-<div class="actions"><a class="btn" href="#forum">Перейти на форум →</a><a class="btn secondary" href="#about">Узнать о проекте</a></div>
-<div class="stats"><div class="stat"><strong>3</strong><small>ИГРОВЫХ МИРА</small></div><div class="stat"><strong>24/7</strong><small>ТВОЯ ИСТОРИЯ</small></div><div class="stat"><strong>∞</strong><small>ВОЗМОЖНОСТЕЙ</small></div></div>
-</div>
-<div class="art"><div class="orb"></div><div class="ring"></div><div class="logoMark">N<span>O</span></div><div class="floating f1"><b>NEWESOME</b>ТВОЙ НОВЫЙ МИР</div><div class="floating f2"><b>ONLINE</b><span style="color:#55e6ad">● Проект развивается</span></div></div>
+
+<p class="lead">
+Добро пожаловать в NEWESOME ONLINE — мир больших возможностей, ярких встреч и собственной истории. Выбирай путь и создавай свою легенду.
+</p>
+
+<div class="actions">
+<a class="btn" href="#forum">Перейти на форум →</a>
+<a class="btn secondary" href="#about">Узнать о проекте</a>
 </div>
 
+<div class="stats">
+<div class="stat"><strong>3</strong><small>ИГРОВЫХ МИРА</small></div>
+<div class="stat"><strong>24/7</strong><small>ТВОЯ ИСТОРИЯ</small></div>
+<div class="stat"><strong>∞</strong><small>ВОЗМОЖНОСТЕЙ</small></div>
+</div>
+</div>
+
+<div class="art">
+<div class="orb"></div>
+<div class="ring"></div>
+<div class="logoMark">N<span>O</span></div>
+<div class="floating f1"><b>NEWESOME</b>ТВОЙ НОВЫЙ МИР</div>
+<div class="floating f2"><b>ONLINE</b><span style="color:#55e6ad">● Проект развивается</span></div>
+</div>
+</div>
 
 <section id="forum">
-<div class="sectionHead"><div><div class="eyebrow">Общение сообщества</div><h2>Форум NEWESOME</h2></div><div class="sub">Обсуждай проект, делись идеями и задавай вопросы</div></div>
-<div class="features">
-  <div class="feature"><div class="ico">📢</div><h3>Новости и объявления</h3><p>Важные новости проекта, анонсы обновлений и сообщения администрации.</p><button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button></div>
-  <div class="feature"><div class="ico">💬</div><h3>Общение игроков</h3><p>Знакомься с участниками сообщества, обсуждай игру и делись впечатлениями.</p><button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button></div>
-  <div class="feature"><div class="ico">💡</div><h3>Идеи и предложения</h3><p>Предлагай улучшения для NEWESOME ONLINE и помогай развивать проект.</p><button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button></div>
+<div class="sectionHead">
+<div>
+<div class="eyebrow">Общение сообщества</div>
+<h2>Форум NEWESOME</h2>
 </div>
+<div class="sub">Обсуждай проект, делись идеями и задавай вопросы</div>
+</div>
+
+<div class="features">
+<div class="feature">
+<div class="ico">📢</div>
+<h3>Новости и объявления</h3>
+<p>Важные новости проекта, анонсы обновлений и сообщения администрации.</p>
+<button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button>
+</div>
+
+<div class="feature">
+<div class="ico">💬</div>
+<h3>Общение игроков</h3>
+<p>Знакомься с участниками сообщества, обсуждай игру и делись впечатлениями.</p>
+<button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button>
+</div>
+
+<div class="feature">
+<div class="ico">💡</div>
+<h3>Идеи и предложения</h3>
+<p>Предлагай улучшения для NEWESOME ONLINE и помогай развивать проект.</p>
+<button class="btn secondary" style="margin-top:16px" onclick="forumNotice()">Открыть раздел</button>
+</div>
+</div>
+
 <div class="card" style="margin-top:16px">
-  <div class="serverTop"><div><div class="eyebrow">Форум</div><h3 style="margin:8px 0 4px">Форум скоро откроется</h3></div><span class="online">● ГОТОВИТСЯ</span></div>
-  <p>Пока это макет разделов. Для настоящего форума с темами, комментариями, аккаунтами и модерацией потребуется подключить серверную часть и базу данных.</p>
+<div class="serverTop">
+<div>
+<div class="eyebrow">Форум</div>
+<h3 style="margin:8px 0 4px">Форум скоро откроется</h3>
+</div>
+<span class="online">● ГОТОВИТСЯ</span>
+</div>
+<p>Пока это макет разделов. Для настоящего форума с темами, комментариями, аккаунтами и модерацией потребуется подключить серверную часть и базу данных.</p>
 </div>
 </section>
 
-<section id="about"><div class="sectionHead"><div><div class="eyebrow">Больше, чем игра</div><h2>Мир твоих возможностей</h2></div></div>
-<div class="features">
-<div class="feature"><div class="ico">🏙️</div><h3>Живой игровой мир</h3><p>Исследуй город, знакомься с игроками и находи своё место в виртуальной жизни.</p></div>
-<div class="feature"><div class="ico">🚘</div><h3>Твой стиль</h3><p>Создавай персонажа, выбирай занятия и развивай собственную игровую историю.</p></div>
-<div class="feature"><div class="ico">🤝</div><h3>Сообщество</h3><p>Общайся, объединяйся с друзьями и участвуй в жизни игрового проекта.</p></div>
-</div></section>
-<section id="news"><div class="sectionHead"><div><div class="eyebrow">Будь в курсе</div><h2>Последние новости</h2></div></div>
-<div class="news">
-<article class="newsItem"><span class="date">НОВОСТИ ПРОЕКТА</span><h3>NEWESOME ONLINE готовится к запуску</h3><p>Мы создаём новый игровой мир. Следи за обновлениями — скоро появятся подробности.</p></article>
-<article class="newsItem"><span class="date">РАЗРАБОТКА</span><h3>Работа над серверами</h3><p>Подготовка игровых миров и сайта продолжается.</p></article>
-<article class="newsItem"><span class="date">СООБЩЕСТВО</span><h3>Скоро встречаемся в игре</h3><p>Следи за анонсами открытия проекта.</p></article>
-</div></section>
-<section id="start"><div class="cta"><div><div class="eyebrow">Твой следующий шаг</div><h2>Готов начать свою историю?</h2><p>NEWESOME ONLINE — твой мир начинается здесь.</p></div><button class="btn" onclick="comingSoon()">Скоро открытие →</button></div></section>
-</main>
-<footer><div class="wrap foot"><div><b style="color:#dce6ff">NEWESOME ONLINE</b> · Игровой RP-проект</div><div>© 2026 NEWESOME ONLINE. Неофициальный демонстрационный сайт.</div></div></footer>
-<div class="modal" id="loginModal" onclick="if(event.target===this)closeModal()">
-  <div class="modalBox">
-    <button class="close" onclick="closeModal()">×</button>
-    <h2 id="authTitle">Личный кабинет</h2>
-    <p id="authDescription">Войди в аккаунт или создай новый.</p>
-    <div id="authForm">
-      <input id="displayName" placeholder="Имя игрока (для регистрации)" autocomplete="nickname" style="display:none">
-      <input id="authEmail" type="email" placeholder="Электронная почта" autocomplete="email">
-      <input id="authPassword" type="password" placeholder="Пароль (не менее 6 символов)" autocomplete="current-password">
-      <button class="btn" id="authSubmit" onclick="submitAuth()">Войти</button>
-      <button class="btn secondary" id="authSwitch" onclick="switchAuthMode()" style="width:100%;margin-top:10px">Создать аккаунт</button>
-    </div>
-    <div id="profilePanel" style="display:none">
-      <p id="profileText"></p>
-      <p id="profileRole" class="roleBadge" style="margin:12px 0"></p>
-      <button class="btn" onclick="signOut()" style="width:100%">Выйти из аккаунта</button>
-    </div>
-    <p id="authMessage" role="status" style="margin-top:14px"></p>
-    <p class="notice">Используй действующую почту. При включённом подтверждении регистрации Supabase отправит письмо для активации аккаунта.</p>
-  </div>
+<section id="about">
+<div class="sectionHead">
+<div>
+<div class="eyebrow">Больше, чем игра</div>
+<h2>Мир твоих возможностей</h2>
 </div>
+</div>
+
+<div class="features">
+<div class="feature">
+<div class="ico">🏙️</div>
+<h3>Живой игровой мир</h3>
+<p>Исследуй город, знакомься с игроками и находи своё место в виртуальной жизни.</p>
+</div>
+
+<div class="feature">
+<div class="ico">🚘</div>
+<h3>Твой стиль</h3>
+<p>Создавай персонажа, выбирай занятия и развивай собственную игровую историю.</p>
+</div>
+
+<div class="feature">
+<div class="ico">🤝</div>
+<h3>Сообщество</h3>
+<p>Общайся, объединяйся с друзьями и участвуй в жизни игрового проекта.</p>
+</div>
+</div>
+</section>
+
+<section id="news">
+<div class="sectionHead">
+<div>
+<div class="eyebrow">Будь в курсе</div>
+<h2>Последние новости</h2>
+</div>
+</div>
+
+<div class="news">
+<article class="newsItem">
+<span class="date">НОВОСТИ ПРОЕКТА</span>
+<h3>NEWESOME ONLINE готовится к запуску</h3>
+<p>Мы создаём новый игровой мир. Следи за обновлениями — скоро появятся подробности.</p>
+</article>
+
+<article class="newsItem">
+<span class="date">РАЗРАБОТКА</span>
+<h3>Работа над серверами</h3>
+<p>Подготовка игровых миров и сайта продолжается.</p>
+</article>
+
+<article class="newsItem">
+<span class="date">СООБЩЕСТВО</span>
+<h3>Скоро встречаемся в игре</h3>
+<p>Следи за анонсами открытия проекта.</p>
+</article>
+</div>
+</section>
+
+<section id="start">
+<div class="cta">
+<div>
+<div class="eyebrow">Твой следующий шаг</div>
+<h2>Готов начать свою историю?</h2>
+<p>NEWESOME ONLINE — твой мир начинается здесь.</p>
+</div>
+<button class="btn" onclick="comingSoon()">Скоро открытие →</button>
+</div>
+</section>
+
+</main>
+
+<footer>
+<div class="wrap foot">
+<div><b style="color:#dce6ff">NEWESOME ONLINE</b> · Игровой RP-проект</div>
+<div>© 2026 NEWESOME ONLINE. Неофициальный демонстрационный сайт.</div>
+</div>
+</footer>
+
+<div class="modal" id="loginModal" onclick="if(event.target===this)closeModal()">
+<div class="modalBox">
+
+<button class="close" onclick="closeModal()">×</button>
+
+<h2 id="authTitle">Личный кабинет</h2>
+<p id="authDescription">Войди в аккаунт или создай новый.</p>
+
+<div id="authForm">
+<input id="displayName" placeholder="Имя игрока (для регистрации)" autocomplete="nickname" style="display:none">
+<input id="authEmail" type="email" placeholder="Электронная почта" autocomplete="email">
+<input id="authPassword" type="password" placeholder="Пароль (не менее 6 символов)" autocomplete="current-password">
+
+<button class="btn" id="authSubmit" onclick="submitAuth()">Войти</button>
+
+<button class="btn secondary" id="authSwitch" onclick="switchAuthMode()" style="width:100%;margin-top:10px">
+Создать аккаунт
+</button>
+</div>
+
+<div id="profilePanel" style="display:none">
+<p id="profileText"></p>
+<p id="profileRole" class="roleBadge" style="margin:12px 0"></p>
+<button class="btn" onclick="signOut()" style="width:100%">Выйти из аккаунта</button>
+</div>
+
+<p id="authMessage" role="status" style="margin-top:14px"></p>
+
+<p class="notice">
+Используй действующую почту. После регистрации Supabase отправит письмо для активации аккаунта.
+</p>
+
+</div>
+</div>
+
 <script>
-// 1) Создай проект Supabase и вставь сюда Project URL и anon/public key.
+
+// НАСТРОЙКИ SUPABASE
+
 const SUPABASE_URL = "https://gxhtwytsmbkmkfgzaqxz.supabase.co";
+
 const SUPABASE_ANON_KEY = "sb_publishable_k7Fp1MC6EgzGQ9xryDH10Q_r0_WTHG7";
+
+const SITE_URL = "https://artemhiller-svg.github.io/newsome-online/";
+
 let supabaseClient = null;
 let authMode = "login";
 
-function getSupabase() {
-  if (SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("ВСТАВЬТЕ") &&
-      SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("ВСТАВЬТЕ")) {
-    if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return supabaseClient;
-  }
-  showAuthMessage("Сначала подключи Supabase: вставь Project URL и anon/public key в код сайта.", true);
-  return null;
+function getSupabase(){
+
+if(!supabaseClient){
+supabaseClient = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
 }
-function showAuthMessage(message, isError=false) {
-  const el = document.getElementById("authMessage");
-  el.textContent = message;
-  el.style.color = isError ? "#ff9b9b" : "#7ee8bd";
+
+return supabaseClient;
 }
+
+function showAuthMessage(message,isError=false){
+
+const el = document.getElementById("authMessage");
+
+el.textContent = message;
+el.style.color = isError ? "#ff9b9b" : "#7ee8bd";
+
+}
+
 function openModal(){
-  document.getElementById("loginModal").classList.add("show");
-  refreshSession();
+
+document.getElementById("loginModal").classList.add("show");
+
+refreshSession();
+
 }
-function closeModal(){document.getElementById("loginModal").classList.remove("show")}
+
+function closeModal(){
+
+document.getElementById("loginModal").classList.remove("show");
+
+}
+
 function switchAuthMode(){
-  authMode = authMode === "login" ? "signup" : "login";
-  document.getElementById("authTitle").textContent = authMode === "login" ? "Вход в аккаунт" : "Регистрация";
-  document.getElementById("authSubmit").textContent = authMode === "login" ? "Войти" : "Зарегистрироваться";
-  document.getElementById("authSwitch").textContent = authMode === "login" ? "Создать аккаунт" : "У меня уже есть аккаунт";
-  document.getElementById("displayName").style.display = authMode === "signup" ? "block" : "none";
-  document.getElementById("authPassword").autocomplete = authMode === "login" ? "current-password" : "new-password";
-  showAuthMessage("");
+
+authMode = authMode === "login" ? "signup" : "login";
+
+document.getElementById("authTitle").textContent =
+authMode === "login" ? "Вход в аккаунт" : "Регистрация";
+
+document.getElementById("authSubmit").textContent =
+authMode === "login" ? "Войти" : "Зарегистрироваться";
+
+document.getElementById("authSwitch").textContent =
+authMode === "login" ? "Создать аккаунт" : "У меня уже есть аккаунт";
+
+document.getElementById("displayName").style.display =
+authMode === "signup" ? "block" : "none";
+
+document.getElementById("authPassword").autocomplete =
+authMode === "login" ? "current-password" : "new-password";
+
+showAuthMessage("");
+
 }
+
+// РЕГИСТРАЦИЯ И ВХОД
+
 async function submitAuth(){
-  const client = getSupabase(); if (!client) return;
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
-  const displayName = document.getElementById("displayName").value.trim();
-  if (!email || !password) return showAuthMessage("Введи электронную почту и пароль.", true);
-  if (password.length < 6) return showAuthMessage("Пароль должен содержать минимум 6 символов.", true);
-  const button = document.getElementById("authSubmit"); button.disabled = true;
-  try {
-    if (authMode === "signup") {
-      const {data, error} = await client.auth.signUp({
-        email, password, options: {data: {display_name: displayName || "Игрок"}}
-      });
-      if (error) throw error;
-      if (data.session) {
-        showProfile(data.user);
-        showAuthMessage("Аккаунт создан! Добро пожаловать.");
-      } else {
-        showAuthMessage("Регистрация почти завершена. Проверь почту и перейди по ссылке подтверждения.");
-      }
-    } else {
-      const {data, error} = await client.auth.signInWithPassword({email, password});
-      if (error) throw error;
-      showProfile(data.user);
-      showAuthMessage("Ты успешно вошёл в аккаунт!");
-    }
-  } catch (e) { showAuthMessage(e.message || "Не удалось выполнить запрос.", true); }
-  finally { button.disabled = false; }
+
+const client = getSupabase();
+
+const email = document.getElementById("authEmail").value.trim();
+
+const password = document.getElementById("authPassword").value;
+
+const displayName = document.getElementById("displayName").value.trim();
+
+if(!email || !password){
+
+return showAuthMessage("Введи электронную почту и пароль.",true);
+
 }
+
+if(password.length < 6){
+
+return showAuthMessage("Пароль должен содержать минимум 6 символов.",true);
+
+}
+
+const button = document.getElementById("authSubmit");
+
+button.disabled = true;
+
+try{
+
+if(authMode === "signup"){
+
+const {data,error} = await client.auth.signUp({
+
+email:email,
+
+password:password,
+
+options:{
+
+data:{
+display_name:displayName || "Игрок"
+},
+
+emailRedirectTo:SITE_URL
+
+}
+
+});
+
+if(error) throw error;
+
+if(data.session){
+
+showProfile(data.user);
+
+showAuthMessage("Аккаунт создан! Добро пожаловать.");
+
+}else{
+
+showAuthMessage(
+"Регистрация почти завершена! Проверь почту и нажми ссылку подтверждения. После подтверждения ты вернёшься на NEWESOME ONLINE."
+);
+
+}
+
+}else{
+
+const {data,error} = await client.auth.signInWithPassword({
+
+email:email,
+password:password
+
+});
+
+if(error) throw error;
+
+showProfile(data.user);
+
+showAuthMessage("Ты успешно вошёл в аккаунт!");
+
+}
+
+}catch(e){
+
+showAuthMessage(e.message || "Не удалось выполнить запрос.",true);
+
+}finally{
+
+button.disabled = false;
+
+}
+
+}
+
+// ПРОФИЛЬ
+
 async function showProfile(user){
-  document.getElementById("authForm").style.display = "none";
-  document.getElementById("profilePanel").style.display = "block";
-  const name = user.user_metadata?.display_name || "Игрок";
-  document.getElementById("authTitle").textContent = "Личный кабинет";
-  document.getElementById("profileText").textContent = "Привет, " + name + "! Почта: " + user.email;
-  const roleEl = document.getElementById("profileRole");
-  roleEl.textContent = "Роль: Игрок";
-  const client = getSupabase();
-  if (!client) return;
-  const {data, error} = await client.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (error) {
-    showAuthMessage("Аккаунт работает, но таблица ролей ещё не настроена. Выполни SQL-файл из инструкции.", true);
-    return;
-  }
-  const roleNames = {
-    player: "Игрок",
-    moderator: "Модератор",
-    curator: "Куратор",
-    state_curator: "Государственный куратор",
-    crime_curator: "Криминальный куратор",
-    deputy_state_head: "ЗГС гос.",
-    state_head: "ГС гос.",
-    deputy_admin: "Заместитель главного администратора",
-    admin: "Главный администратор",
-    owner: "Владелец",
-    founder: "Основатель"
-  };
-  roleEl.textContent = "Роль: " + (roleNames[data?.role] || "Игрок");
+
+document.getElementById("authForm").style.display = "none";
+
+document.getElementById("profilePanel").style.display = "block";
+
+const name = user.user_metadata?.display_name || "Игрок";
+
+document.getElementById("authTitle").textContent = "Личный кабинет";
+
+document.getElementById("profileText").textContent =
+"Привет, " + name + "! Почта: " + user.email;
+
+const roleEl = document.getElementById("profileRole");
+
+roleEl.textContent = "Роль: Игрок";
+
+const client = getSupabase();
+
+const {data,error} = await client
+.from("profiles")
+.select("role")
+.eq("id",user.id)
+.maybeSingle();
+
+if(error){
+
+showAuthMessage("Профиль загружен. Таблица ролей пока не настроена.",true);
+
+return;
+
 }
+
+const roleNames = {
+
+player:"Игрок",
+moderator:"Модератор",
+curator:"Куратор",
+state_curator:"Государственный куратор",
+crime_curator:"Криминальный куратор",
+deputy_state_head:"ЗГС гос.",
+state_head:"ГС гос.",
+deputy_admin:"Заместитель главного администратора",
+admin:"Главный администратор",
+owner:"Владелец",
+founder:"Основатель"
+
+};
+
+roleEl.textContent = "Роль: " + (roleNames[data?.role] || "Игрок");
+
+}
+
 function showAuthForm(){
-  document.getElementById("authForm").style.display = "block";
-  document.getElementById("profilePanel").style.display = "none";
-  document.getElementById("authTitle").textContent = authMode === "login" ? "Вход в аккаунт" : "Регистрация";
+
+document.getElementById("authForm").style.display = "block";
+
+document.getElementById("profilePanel").style.display = "none";
+
+document.getElementById("authTitle").textContent =
+authMode === "login" ? "Вход в аккаунт" : "Регистрация";
+
 }
+
+// ПРОВЕРКА СЕССИИ
+
 async function refreshSession(){
-  const client = getSupabase(); if (!client) return;
-  const {data} = await client.auth.getSession();
-  if (data.session) showProfile(data.session.user); else showAuthForm();
+
+const client = getSupabase();
+
+const {data,error} = await client.auth.getSession();
+
+if(error){
+
+showAuthMessage(error.message,true);
+
+return;
+
 }
+
+if(data.session){
+
+showProfile(data.session.user);
+
+}else{
+
+showAuthForm();
+
+}
+
+}
+
+// ОБРАБОТКА ПОДТВЕРЖДЕНИЯ EMAIL
+
+const client = getSupabase();
+
+client.auth.onAuthStateChange((event,session)=>{
+
+if(event === "SIGNED_IN" && session){
+
+showProfile(session.user);
+
+showAuthMessage("Почта подтверждена! Добро пожаловать в NEWESOME ONLINE.");
+
+}
+
+});
+
+// ВЫХОД
+
 async function signOut(){
-  const client = getSupabase(); if (!client) return;
-  const {error} = await client.auth.signOut();
-  if (error) return showAuthMessage(error.message, true);
-  showAuthForm(); showAuthMessage("Ты вышел из аккаунта.");
+
+const client = getSupabase();
+
+const {error} = await client.auth.signOut();
+
+if(error){
+
+return showAuthMessage(error.message,true);
+
 }
-function forumNotice(){alert("Форум пока находится в разработке. Скоро здесь можно будет создавать темы и общаться!")}
-function comingSoon(){alert("Этот раздел пока готовится к запуску NEWESOME ONLINE!")}
+
+showAuthForm();
+
+showAuthMessage("Ты вышел из аккаунта.");
+
+}
+
+// ФОРУМ
+
+function forumNotice(){
+
+alert("Форум пока находится в разработке. Скоро здесь можно будет создавать темы и общаться!");
+
+}
+
+function comingSoon(){
+
+alert("Этот раздел пока готовится к запуску NEWESOME ONLINE!");
+
+}
+
 </script>
-</body></html>
+
+</body>
+</html>
